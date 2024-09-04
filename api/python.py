@@ -2,29 +2,24 @@ import MetaTrader5 as mt5
 import requests
 import time
 
-# اطلاعات حساب کاربری
 login = 88947082
 password = "EhsanKamyabi$1"
 server = "LiteFinance-MT5-Live"
 
-# اطلاعات حساب دوم
 login_second = 12345678
 password_second = "SecondAccountPassword"
 server_second = "SecondServer"
 
-# اتصال به متاتریدر
 if not mt5.initialize(login=login, password=password, server=server):
     print("متاتریدر5 راه‌اندازی نشد")
     mt5.shutdown()
 
-# تابع برای باز کردن معامله در حساب دوم
 def open_trade_in_second_account(trade):
     if not mt5.initialize(login=login_second, password=password_second, server=server_second):
         print("متاتریدر5 راه‌اندازی نشد برای حساب دوم")
         mt5.shutdown()
         return
 
-    # تنظیم حجم معامله بر اساس نسبت بالانس حساب‌ها
     volume = trade['volume']
     if volume > 10:
         volume /= 100
@@ -50,7 +45,6 @@ def open_trade_in_second_account(trade):
 
     mt5.shutdown()
 
-# حلقه بی‌نهایت برای بررسی معاملات جدید
 while True:
     trades = mt5.positions_get()
     if trades is None:
@@ -69,13 +63,10 @@ while True:
             trade_data.append(trade_info)
             open_trade_in_second_account(trade_info)
 
-        # ارسال اطلاعات به Node.js
         url = "http://localhost:3000/trades"
         response = requests.post(url, json={"trades": trade_data})
         print(response.status_code)
 
-    # وقفه 60 ثانیه‌ای بین هر بررسی
     time.sleep(60)
 
-# قطع اتصال
 mt5.shutdown()
